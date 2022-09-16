@@ -8,8 +8,17 @@ face_cascade = cv2.CascadeClassifier(cv2.samples.findFile(
 body_cascade = cv2.CascadeClassifier(cv2.samples.findFile(
 	"C:/Users/torek/PycharmProjects/Security_Camera/venv/Lib/site-packages/cv2/data/haarcascade_fullbody.xml"))
 
-
 def detectBodies(frame):
+	grayscale_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+	scale_factor, overlap = 1.3, 5
+	bodies = body_cascade.detectMultiScale(grayscale_img, scale_factor, overlap)
+
+	for (body_top_left_x, body_top_left_y, width, height) in bodies:
+		cv2.rectangle(frame, (body_top_left_x, body_top_left_y), (body_top_left_x + width, body_top_left_y + height),
+					  COLORS["RED"], LINE_THICKNESS)
+
+
+def detectFaces(frame):
 	"""
 	Scale factor: Parameter specifying how much the image size is reduced at each image scale
 	Recomm: 1.1 -> 1.5
@@ -32,6 +41,7 @@ record = True
 while record:
 	_, frame = cap.read()
 
+	detectFaces(frame)
 	detectBodies(frame)
 
 	cv2.imshow("Security Camera", frame)
