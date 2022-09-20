@@ -1,11 +1,20 @@
 import cv2
 from datetime import datetime
 import time
+from email.message import EmailMessage
+import smtplib
+import ssl
 
-COLORS = {"RED" : [0, 0, 255], "BLACK": [0, 0, 0], "BLUE": [255, 0, 0]}
-LINE_THICKNESS = 5
+sender_email = ""
+password = ""
+EMAIL_SENDER_ID = ""
+target_email = ""
+EMAIL_HEADER = "Security Alert"
+EMAIL_SUBJECT = "Security Camera Activated"
+EMAIL_MESSAGE = "The Security Camera Activated at time: "
+
 FRAME_RATE = 20
-SECONDS_TO_RECORD_AFTER_DETECTION = 10
+SECONDS_TO_RECORD_AFTER_DETECTION = 20
 
 face_cascade = cv2.CascadeClassifier(cv2.samples.findFile(
 	"C:/Users/torek/PycharmProjects/Security_Camera/venv/Lib/site-packages/cv2/data/haarcascade_frontalface_default.xml"))
@@ -15,27 +24,28 @@ def main():
 	cap = cv2.VideoCapture(0)
 	frame_size = (int(cap.get(3)), int(cap.get(4)))
 	fourCC = cv2.VideoWriter_fourcc(*'mp4v')
-	detection_stopped_time = None
-	timer_started = False
-	detecting = False
+	detection_stopped_time, timer_started, detecting = (None, False, False)
 	running = True
 	while running:
 		_, frame = cap.read()
 		number_of_faces = detectFaces(frame)
-		if  number_of_faces > 0: #  or detectBodiesHOG(frame) > 0
+		# number_of_bodies = detectBodiesHOG(frame)
+		if number_of_faces > 0:
 			if detecting:
 				timer_started = False
 			else:
 				detecting = True
-				output = cv2.VideoWriter(f'Recordings/{getDateAndTimeFormatted()}.mp4', fourCC, FRAME_RATE, frame_size)
-				print(f"Started Recording at time: {time.time()}")
+				activation_time = getDateAndTimeFormatted()
+				output = cv2.VideoWriter(f'Recordings/{activation_time}.mp4', fourCC, FRAME_RATE, frame_size)
+				print(f"Started Recording")
+				sendAnAlertEmail(activation_time)
 		elif detecting:
 			if timer_started:
 				if reachedEndOfRecordingTime(detection_stopped_time):
 					detecting = False
 					timer_started = False
 					output.release()
-					print(f"Stopped Recording at time: {time.time()}")
+					print(f"Stopped Recording")
 			else:
 				timer_started = True
 				detection_stopped_time = time.time()
@@ -58,11 +68,8 @@ def detectBodiesHOG(frame):
 	hog = cv2.HOGDescriptor()
 	hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
 
-	bodies = hog.detectMultiScale(frame, winStride=(5, 5), padding=(3, 3), scale=1.3)
+	bodies, _ = hog.detectMultiScale(frame, winStride=(5, 5), padding=(3, 3), scale=1.3)
 
-	# for (body_top_left_x, body_top_left_y, width, height) in bodies:
-	# 	cv2.rectangle(frame, (body_top_left_x, body_top_left_y), (body_top_left_x + width, body_top_left_y + height),
-	# 				  COLORS["BLUE"], LINE_THICKNESS)
 	return len(bodies)
 
 
@@ -79,18 +86,32 @@ def detectFaces(frame):
 	scale_factor, overlap = 1.3, 6
 	faces = face_cascade.detectMultiScale(grayscale_img, scale_factor, overlap)
 
-	# for (face_top_left_x, face_top_left_y, width, height) in faces:
-	# 	cv2.rectangle(frame, (face_top_left_x, face_top_left_y), (face_top_left_x + width, face_top_left_y + height),
-	# 				  COLORS["RED"], LINE_THICKNESS)
 	return len(faces)
 
 
 def getDateAndTimeFormatted():
-	return datetime.now().strftime("%Y%m%d-%H%M%S")
+	return datetime.now().strftime("%Y-%m-%d_%H-%M-%S")
 
 
 def reachedEndOfRecordingTime(detection_stopped_time):
-	return time.time() - detection_stopped_time >= SECONDS_TO_RECORD_AFTER_DETECTION
+	return (time.time() - detection_stopped_time) >= SECONDS_TO_RECORD_AFTER_DETECTION
+
+
+def sendAnAlertEmail(timeOfActivation):
+	emailToSend = EmailMessage()
+	emailToSend["From"] = EMAIL_SENDER_ID
+	emailToSend["Header"] = EMAIL_HEADER
+	emailToSend["Subject"] = EMAIL_SUBJECT
+	emailToSend.set_content(EMAIL_MESSAGE + timeOfActivation)
+
+	SMTP_SERVER = "smtp.gmail.com"
+	SMTP_PORT = 465
+	print("Sending Email")
+	context = ssl.create_default_context()
+	with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
+		server.login(sender_email, password)
+		server.sendmail(sender_email, target_email, emailToSend.as_string())
+		print(f"Email has been sent to {target_email}")
 
 
 if __name__ == "__main__":
