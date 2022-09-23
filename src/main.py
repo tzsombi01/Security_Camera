@@ -40,7 +40,6 @@ def main():
 		_, frame = camera.read()
 		number_of_faces = detectFaces(frame)
 		number_of_bodies = detectBodiesHOG(frame)
-		# number_of_bodies = detectBodiesCascade(frame)
 		if number_of_faces > 0 or number_of_bodies > 0:
 			if detecting:
 				timer_started = False
@@ -73,25 +72,15 @@ def main():
 	cv2.destroyAllWindows()
 
 
-def detectBodiesHOG(frame):
+def detectBodiesHOG(image):
 	hog = cv2.HOGDescriptor()
 	hog.setSVMDetector(cv2.HOGDescriptor_getDefaultPeopleDetector())
-	bodies, _ = hog.detectMultiScale(frame, winStride=(10, 10), padding=(20, 20), scale=1.09)
-	for (body_top_left_x, body_top_left_y, width, height) in bodies:
-		cv2.rectangle(frame, (body_top_left_x, body_top_left_y),
-					  (body_top_left_x + width, body_top_left_y + height), [255, 0, 0], 10)
+	bodies, _ = hog.detectMultiScale(image, winStride=(10, 10), padding=(20, 20), scale=1.075)
 	return len(bodies)
 
 
-def detectBodiesCascade(frame):
-	grayscale_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-	scale_factor, overlap = 1.3, 4
-	bodies = body_cascade.detectMultiScale(grayscale_img, scale_factor, overlap)
-	return len(bodies)
-
-
-def detectFaces(frame):
-	grayscale_img = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
+def detectFaces(image):
+	grayscale_img = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 	scale_factor, overlap = 1.3, 6
 	faces = face_cascade.detectMultiScale(grayscale_img, scale_factor, overlap)
 	return len(faces)
