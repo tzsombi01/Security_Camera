@@ -11,6 +11,7 @@ sender_email = ""
 password = ""
 EMAIL_SENDER_ID = ""
 target_email = ""
+# TODO EmailAttributes Class getters setters
 EMAIL_HEADER = "Security Alert"
 EMAIL_SUBJECT = "Security Camera Activated"
 EMAIL_MESSAGE_TIME_SUBSTRING = "The Security Camera Activated at time: "
@@ -18,6 +19,7 @@ EMAIL_MESSAGE_LOCATION_SUBSTRING = "The Security Camera Activated at location: "
 
 SECONDS_TO_RECORD_AFTER_DETECTION = 20
 
+# TODO argparse
 face_cascade = cv2.CascadeClassifier(cv2.samples.findFile(
 	"C:/Users/torek/PycharmProjects/Security_Camera/venv/Lib/site-packages/cv2/data/haarcascade_frontalface_default.xml"))
 body_cascade = cv2.CascadeClassifier(cv2.samples.findFile(
@@ -124,20 +126,20 @@ def sendAnAlertEmail(timeOfActivation, location):
 
 
 def getLocationOfCamera():
-	ip = geocoder.ip("me")
-	userLocationCoordinates = (ip.latlng[0], ip.latlng[1]) #
-	"""
-	Test(s):
-	(32.7831, -96.8067) -> Dallas, United States, 75202, 
-	(50.1155, 8.6842) -> Frankfurt am Main, Deutschland, 60313,
-	(47.6833, 17.6351) -> Győr, Magyarország, 9021
-	"""
-	geoLoc = Nominatim(user_agent="_")
-	locationOfUser = geoLoc.reverse(userLocationCoordinates)
-	locationAsList = [locationOfUser.raw["address"]["city"],
-					  locationOfUser.raw["address"]["country"],
-					  locationOfUser.raw["address"]["postcode"]]
-	return ", ".join(locationAsList)
+	ip_address = geocoder.ip("me")
+	if isinstance(ip_address, type(None)):
+		userLocationCoordinates = (ip_address.latlng[0], ip_address.latlng[1])
+		geoLoc = Nominatim(user_agent="_")
+		locationOfUser = geoLoc.reverse(userLocationCoordinates)
+		return ", ".join(getLocationAsList(locationOfUser))
+	else:
+		return "Unknown Location"
+
+
+def getLocationAsList(location):
+	return [location.raw["address"]["city"],
+			location.raw["address"]["country"],
+			location.raw["address"]["postcode"]]
 
 
 if __name__ == "__main__":
