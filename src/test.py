@@ -5,6 +5,9 @@ import unittest
 class Test(unittest.TestCase):
 
 	def setUp(self):
+		self.illegalCharacters = [' ', '\\', '/', '|', '"', '?',
+								  '%', '!', '$', '&', '<', '>',
+								  '@', '˙', ':', '.', '-', '_', '+']
 		self.geoLoc = Nominatim(user_agent="_")
 		self.testImage1 = cv2.imread("TestImages/testImage1.jpg", -1)
 		self.testImage2 = cv2.imread("TestImages/testImage2.jpg", -1)
@@ -12,12 +15,8 @@ class Test(unittest.TestCase):
 		self.testImage4 = cv2.imread("TestImages/testImage4.jpg", -1)
 
 	def test_formatted_date_is_valid(self):
-		characterList = [' ', '\\', '/', '|', '"', '?', '<', '>', ':', '.']
-		for character in characterList:
+		for character in self.illegalCharacters:
 			self.assertFalse(character in getDateAndTimeFormatted())
-
-		self.assertFalse(getDateAndTimeFormatted().endswith(' '))
-		self.assertFalse(getDateAndTimeFormatted().endswith('~'))
 
 	def test_end_of_recording_time_is_valid(self):
 		self.assertTrue(reachedEndOfRecordingTime(time.time() - SECONDS_TO_RECORD_AFTER_DETECTION - 1))

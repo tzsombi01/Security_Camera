@@ -11,7 +11,6 @@ sender_email = ""
 password = ""
 EMAIL_SENDER_ID = ""
 target_email = ""
-# TODO EmailAttributes Class getters setters
 EMAIL_HEADER = "Security Alert"
 EMAIL_SUBJECT = "Security Camera Activated"
 EMAIL_MESSAGE_TIME_SUBSTRING = "The Security Camera Activated at time: "
@@ -22,8 +21,6 @@ SECONDS_TO_RECORD_AFTER_DETECTION = 20
 # TODO argparse
 face_cascade = cv2.CascadeClassifier(cv2.samples.findFile(
 	"C:/Users/torek/PycharmProjects/Security_Camera/venv/Lib/site-packages/cv2/data/haarcascade_frontalface_default.xml"))
-body_cascade = cv2.CascadeClassifier(cv2.samples.findFile(
-	"C:/Users/torek/PycharmProjects/Security_Camera/venv/Lib/site-packages/cv2/data/haarcascade_fullbody.xml"))
 
 
 def main():
