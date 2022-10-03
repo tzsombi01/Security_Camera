@@ -3,12 +3,10 @@ import unittest
 
 
 class Test(unittest.TestCase):
-
 	def setUp(self):
 		self.illegalCharacters = [' ', '\\', '/', '|', '"', '?',
 								  '%', '!', '$', '&', '<', '>',
 								  '@', '˙', ':', '.', '-', '_', '+']
-		self.geoLoc = Nominatim(user_agent="_")
 		self.testImage1 = cv2.imread("TestImages/testImage1.jpg", -1)
 		self.testImage2 = cv2.imread("TestImages/testImage2.jpg", -1)
 		self.testImage3 = cv2.imread("TestImages/testImage3.jpg", -1)
@@ -22,14 +20,6 @@ class Test(unittest.TestCase):
 		self.assertTrue(reachedEndOfRecordingTime(time.time() - SECONDS_TO_RECORD_AFTER_DETECTION - 1))
 		self.assertTrue(reachedEndOfRecordingTime(time.time() - SECONDS_TO_RECORD_AFTER_DETECTION))
 		self.assertFalse(reachedEndOfRecordingTime(time.time() - SECONDS_TO_RECORD_AFTER_DETECTION + 1))
-
-	def test_get_location(self):
-		self.assertEqual(["Dallas", "United States", "75202"],
-						 getLocationAsList(self.geoLoc.reverse((32.7831, -96.8067))))
-		self.assertEqual(["Frankfurt am Main", "Deutschland", "60313"],
-						 getLocationAsList(self.geoLoc.reverse((50.1155, 8.6842))))
-		self.assertEqual(["Győr", "Magyarország", "9021"],
-						 getLocationAsList(self.geoLoc.reverse((47.6833, 17.6351))))
 
 	def test_detectBodiesHOG(self):
 		self.assertEqual(0, detectBodiesHOG(self.testImage1))

@@ -36,8 +36,8 @@ def main():
 	while running:
 		_, frame = camera.read()
 		number_of_faces = detectFaces(frame)
-		number_of_bodies = detectBodiesHOG(frame)
-		if number_of_faces > 0 or number_of_bodies > 0:
+		#number_of_bodies = detectBodiesHOG(frame)
+		if number_of_faces > 0: #  or number_of_bodies > 0
 			if detecting:
 				timer_started = False
 			else:
@@ -46,7 +46,7 @@ def main():
 				output = cv2.VideoWriter(f"Recordings/{activation_time}.mp4",
 										 cv2.VideoWriter_fourcc(*"mp4v"), frame_rate, frame_size)
 				print("Started Recording")
-				sendAnAlertEmail(activation_time, locationOfCamera)
+				# sendAnAlertEmail(activation_time, locationOfCamera)
 		elif detecting:
 			if timer_started:
 				if reachedEndOfRecordingTime(detection_stopped_time):
@@ -105,10 +105,16 @@ def sendAnAlertEmail(timeOfActivation, location):
 	SMTP_PORT = 465
 	print("Sending Email")
 	context = ssl.create_default_context()
-	with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
-		server.login(sender_email, password)
-		server.sendmail(sender_email, target_email, emailToSend.as_string())
-		print(f"Email has been sent to {target_email}")
+	try:
+		with smtplib.SMTP_SSL(SMTP_SERVER, SMTP_PORT, context=context) as server:
+			server.login(sender_email, password)
+			server.sendmail(sender_email, target_email, emailToSend.as_string())
+			print(f"Email has been sent to {target_email}")
+	except PermissionError:
+		print("The email address / password is incorrect.")
+	except smtplib.SMTPException as error:
+		print(f"Error while establishing the connection {error}")
+
 
 
 def getLocationOfCamera():
@@ -116,10 +122,14 @@ def getLocationOfCamera():
 	if isinstance(ip_address, type(None)):
 		userLocationCoordinates = (ip_address.latlng[0], ip_address.latlng[1])
 		geoLoc = Nominatim(user_agent="_")
-		locationOfUser = geoLoc.reverse(userLocationCoordinates)
+		try:
+			locationOfUser = geoLoc.reverse(userLocationCoordinates)
+		except Exception as error:
+			print(error)
+			return "Unknown Location"
 		return ", ".join(getLocationAsList(locationOfUser))
 	else:
-		return "Unknown Location"
+		return "No internet connection"
 
 
 def getLocationAsList(location):
