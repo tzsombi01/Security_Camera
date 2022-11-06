@@ -9,7 +9,6 @@ target_email = ""
 EMAIL_HEADER = "Security Alert"
 EMAIL_SUBJECT = "Security Camera Activated"
 EMAIL_MESSAGE_TIME_SUBSTRING = "The Security Camera Activated at time: "
-EMAIL_MESSAGE_LOCATION_SUBSTRING = "The Security Camera Activated at location: "
 
 
 def sendAnAlertEmail(timeOfActivation):
