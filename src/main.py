@@ -1,7 +1,8 @@
 import cv2
-from datetime import datetime
+import argparse
 import time
 import math
+from datetime import datetime
 from extraFeatures.send_email import sendAnAlertEmail
 
 SECONDS_TO_RECORD_AFTER_DETECTION = 20
@@ -9,8 +10,11 @@ LINE_THICKNESS = 5
 COLORS = {"BLUE": [255, 0 , 0],
 		  "GREEN": [0, 255, 0]}
 
-face_cascade = cv2.CascadeClassifier(cv2.samples.findFile(
-	"C:/Users/torek/PycharmProjects/Security_Camera/venv/Lib/site-packages/cv2/data/haarcascade_frontalface_default.xml"))
+parser = argparse.ArgumentParser(description="Cascade classifier path")
+parser.add_argument("--face_cascade", type=str, help="full path to frontalface_default.xml")
+args = parser.parse_args()
+
+face_cascade = cv2.CascadeClassifier(cv2.samples.findFile(args.face_cascade))
 
 
 def main():
