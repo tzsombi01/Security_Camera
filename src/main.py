@@ -11,7 +11,9 @@ COLORS = {"BLUE": [255, 0 , 0],
 		  "GREEN": [0, 255, 0]}
 
 parser = argparse.ArgumentParser(description="Cascade classifier path")
-parser.add_argument("--face_cascade", type=str, help="full path to frontalface_default.xml")
+parser.add_argument("--face_cascade", type=str, help="full path to frontalface_default.xml",
+					default="C:/Users/torek/PycharmProjects/Security_Camera/"
+							"venv/Lib/site-packages/cv2/data/haarcascade_frontalface_default.xml")
 args = parser.parse_args()
 
 face_cascade = cv2.CascadeClassifier(cv2.samples.findFile(args.face_cascade))
